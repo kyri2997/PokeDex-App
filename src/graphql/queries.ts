@@ -1,49 +1,54 @@
 import { gql } from '@apollo/client';
 
-export const GET_POKEMONS = gql`
-  query GetPokemons($limit: Int!, $offset: Int!) {
-    pokemon_v2_pokemon(limit: $limit, offset: $offset) {
+
+const GET_POKEMONS = gql`
+  query {
+    pokemon(limit: 20) {
       id
       name
-      pokemon_v2_pokemonsprites {
-        sprites
-      }
-      pokemon_v2_pokemontypes {
-        pokemon_v2_type {
-          name
-        }
-      }
     }
   }
 `;
+export { GET_POKEMONS };
 
-export const GET_POKEMON_DETAILS = gql`
-  query GetPokemonDetails($name: String!) {
-    pokemon_v2_pokemon(where: { name: { _eq: $name } }) {
+ const GET_POKEMON_DETAILS = gql`
+  query getPokemon($name: String!) {
+    pokemon(where: { name: { _eq: $name } }) {
       id
       name
       height
       weight
-      base_experience
-      pokemon_v2_pokemonsprites {
-        sprites
-      }
-      pokemon_v2_pokemonabilities {
-        pokemon_v2_ability {
+      types {
+        type {
           name
         }
       }
-      pokemon_v2_pokemonstats {
+      abilities {
+        ability {
+          name
+        }
+      }
+      stats {
         base_stat
-        pokemon_v2_stat {
-          name
-        }
-      }
-      pokemon_v2_pokemonevolutions {
-        evolution {
+        stat {
           name
         }
       }
     }
   }
 `;
+export { GET_POKEMON_DETAILS };
+
+
+const GET_POKEMON_BASIC = gql`
+  query getPokemon($name: String!) {
+    pokemon(where: { name: { _eq: $name } }) {
+      id
+      name
+      height
+      weight
+    }
+  }
+`;
+
+export { GET_POKEMON_BASIC };
