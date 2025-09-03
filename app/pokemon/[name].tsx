@@ -5,6 +5,8 @@ import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
+import { getTypeColor } from '../../utils/pokemonTypes';
+
 
 const GET_POKEMON_BASIC = gql`
   query getPokemon($name: String!) {
@@ -16,23 +18,6 @@ const GET_POKEMON_BASIC = gql`
     }
   }
 `;
-
-// Map type to colors
-const getTypeColor = (type: string) => {
-  switch (type.toLowerCase()) {
-    case 'fire': return '#f08030';
-    case 'water': return '#6890f0';
-    case 'grass': return '#78c850';
-    case 'electric': return '#f8d030';
-    case 'psychic': return '#f85888';
-    case 'ice': return '#98d8d8';
-    case 'dragon': return '#7038f8';
-    case 'dark': return '#705848';
-    case 'fairy': return '#ee99ac';
-    case 'normal': return '#a8a878';
-    default: return '#a8a8a8';
-  }
-};
 
 // Get Pokémon ID from name in evolution chain
 
