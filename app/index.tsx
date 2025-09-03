@@ -1,16 +1,18 @@
 // import React from 'react';
-import { View, Text, FlatList, Image, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, Image, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import { useQuery} from '@apollo/client/react';
-import { gql} from '@apollo/client';
 import { useRouter } from 'expo-router';
-import { GET_POKEMONS } from '../src/graphql/queries';
-// import { GET_POKEMON_BASIC } from '../src/graphql/queries';
+import { GET_POKEMONS, GET_TYPES } from '../src/graphql/queries';
+import { useState, useEffect } from 'react';
 
 export default function Home() {
   const router = useRouter();
 
+  const [search, setSearch] = useState('');
+  const [selectedType, setSelectedType] = useState<string | null>(null);
+  const [filteredPokemons, setFilteredPokemons] = useState<any[]>([]);
+
   const { data, loading, error } = useQuery(GET_POKEMONS);
-  //Pseudo: fetch first 20 Pokémon using Apollo useQuery
 
   if (loading) return <Text>Loading...</Text>;
   if (error) return <Text>Error: {error.message}</Text>;
