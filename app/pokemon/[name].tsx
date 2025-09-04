@@ -1,9 +1,8 @@
-import { View, Text, Image, ScrollView } from 'react-native';
+import { View, Text, Image, ScrollView, TouchableOpacity }from 'react-native';
 import { useQuery } from '@apollo/client/react';
 import { gql } from '@apollo/client';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { getTypeColor } from '../../utils/pokemonTypes';
 import { useFavourites } from "../../context/FavouritesContext";
@@ -128,38 +127,67 @@ useEffect(() => {
   const spriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png`;
 
   return (
-  <ScrollView
-  style={{ paddingTop: 80, paddingHorizontal: 20, paddingBottom: 40, backgroundColor: '#f0f8ff' }}
-  contentContainerStyle={{ paddingBottom: 60 }} // ensures you can scroll to bottom
+
+    <ScrollView
+        style={{ paddingTop: 80, paddingHorizontal: 20, paddingBottom: 40, backgroundColor: '#f0f8ff' }}
+        contentContainerStyle={{ paddingBottom: 60 }} // ensures you can scroll to bottom
+    >
+    {/* Back button and Name Row */}
+    {/* Header Row: Back, Name, Favourite */}
+<View
+  style={{
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+    paddingHorizontal: 10,
+  }}
 >
+  {/* Back Button */}
+  <TouchableOpacity
+    onPress={() => router.back()}
+    style={{
+      padding: 8,
+      borderRadius: 8,
+      backgroundColor: '#ffebcd',
+    }}
+  >
+    <Ionicons name="arrow-back" size={24} color="#ff4500" />
+  </TouchableOpacity>
+
   {/* Pokémon Name */}
   <Text
     style={{
       fontSize: 32,
       fontWeight: 'bold',
       textTransform: 'capitalize',
-      textAlign: 'center',
       color: '#ff4500',
-      marginBottom: 20,
+      textAlign: 'center',
+      flex: 1,
     }}
+    numberOfLines={1} // optional: keep it on a single line
   >
-    {pokemon.name} 
-  
+    {pokemon.name}
+  </Text>
+
+  {/* Favourite Button */}
   <TouchableOpacity
-  onPress={() =>
-    isFavourite(pokemon.name)
-      ? removeFavourite(pokemon.name)
-      : addFavourite({ id: pokemon.id, name: pokemon.name })
-  }
-   // slight margin to separate from name
->
-  <Ionicons
-    name={isFavourite(pokemon.name) ? "star" : "star-outline"}
-    size={32}
-    color="#ffd700"
-  />
-</TouchableOpacity>
-</Text>
+    onPress={() =>
+      isFavourite(pokemon.name)
+        ? removeFavourite(pokemon.name)
+        : addFavourite({ id: pokemon.id, name: pokemon.name })
+    }
+    style={{ padding: 8 }}
+  >
+    <Ionicons
+      name={isFavourite(pokemon.name) ? 'star' : 'star-outline'}
+      size={32}
+      color="#ffd700"
+    />
+  </TouchableOpacity>
+</View>
+
+
 
   {/* Sprite */}
   <Image

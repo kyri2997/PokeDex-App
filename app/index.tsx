@@ -70,6 +70,7 @@ export default function Home() {
             <Picker
               selectedValue={selectedType}
               onValueChange={(itemValue) => setSelectedType(itemValue)}
+              
             >
               <Picker.Item label="All types" value="all" />
               {typeData?.type.map((t: any) => (
@@ -78,6 +79,7 @@ export default function Home() {
                   label={capitalize(t.name)}
                   value={t.name}
                   color={getTypeColor(t.name)}
+                 style={{ height: 50, width: '50%' }}
                 />
               ))}
             </Picker>
@@ -151,7 +153,7 @@ const styles = {
     textAlign: 'center',
   },
   searchBar: {
-    padding: 10,
+    padding: 15,
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 8,
@@ -165,6 +167,9 @@ const styles = {
     overflow: 'hidden',
     marginBottom: 10,
     backgroundColor: '#fff',
+    width: '50%',
+    
+    // alignSelf: 'center',
   },
   clearFilterButton: {
     alignSelf: 'flex-start',
