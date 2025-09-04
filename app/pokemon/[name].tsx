@@ -6,6 +6,8 @@ import { useEffect, useState } from 'react';
 import { TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { getTypeColor } from '../../utils/pokemonTypes';
+import { useFavourites } from "../../context/FavouritesContext";
+import { Ionicons } from "@expo/vector-icons";
 
 
 const GET_POKEMON_BASIC = gql`
@@ -40,6 +42,8 @@ export default function PokemonDetails() {
   const [speciesInfo, setSpeciesInfo] = useState<{ flavor: string; generation?: string } | null>(
     null
   );
+  const { addFavourite, removeFavourite, isFavourite } = useFavourites();
+
 
 useEffect(() => {
   if (!pokemonName) return; // nothing to fetch
@@ -139,8 +143,23 @@ useEffect(() => {
       marginBottom: 20,
     }}
   >
-    {pokemon.name}
-  </Text>
+    {pokemon.name} 
+  
+  <TouchableOpacity
+  onPress={() =>
+    isFavourite(pokemon.name)
+      ? removeFavourite(pokemon.name)
+      : addFavourite({ id: pokemon.id, name: pokemon.name })
+  }
+   // slight margin to separate from name
+>
+  <Ionicons
+    name={isFavourite(pokemon.name) ? "star" : "star-outline"}
+    size={32}
+    color="#ffd700"
+  />
+</TouchableOpacity>
+</Text>
 
   {/* Sprite */}
   <Image
