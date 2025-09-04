@@ -51,6 +51,7 @@ export default function Home() {
       data={filteredPokemons}
       style={{ padding: 20 }}
       keyExtractor={(item) => item.id.toString()}
+
       ListHeaderComponent={
         <>
           <Text style={{ fontSize: 32, fontWeight: 'bold', marginBottom: 20, paddingTop: 80 }}>
@@ -91,10 +92,30 @@ export default function Home() {
                   key={t.name}
                   label={t.name.charAt(0).toUpperCase() + t.name.slice(1)}
                   value={t.name}
+                  color = {getTypeColor(t.name)}
                 />
               ))}
             </Picker>
           </View>
+
+            {/* Clear filters */}
+            { selectedType !== 'all' && (
+           
+               <TouchableOpacity
+                onPress={() => setSelectedType('all')}
+                style={{
+                  alignSelf: 'flex-start',
+                  marginBottom: 5,
+                  backgroundColor: '#eee',
+                  borderRadius: 20,
+                  paddingHorizontal: 14,
+                  paddingVertical: 6,
+                }}
+                >   
+                <Text style={{ color: '#333', fontWeight: '500' }}>Clear Filter ✕</Text>
+              </TouchableOpacity>
+            
+            )}
         </>
       }
       renderItem={({ item }) => {

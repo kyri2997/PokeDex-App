@@ -142,9 +142,15 @@ useEffect(() => {
 
   {/* Basic Info */}
   <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginBottom: 15 }}>
-    <Text style={{ fontSize: 18 }}>ID: {pokemon.id}</Text>
-    <Text style={{ fontSize: 18 }}>Height: {pokemon.height}</Text>
-    <Text style={{ fontSize: 18 }}>Weight: {pokemon.weight}</Text>
+    <Text style={{ fontSize: 18}}>
+        <Text style={{ fontWeight: 'bold' }}>ID: </Text>{pokemon.id}
+    </Text>
+    <Text style={{ fontSize: 18}}>
+        <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Height: </Text>{pokemon.height/10}m
+    </Text>
+    <Text style={{ fontSize: 18}}>
+        <Text style={{ fontWeight: 'bold' }}>Weight: </Text>{pokemon.weight/10}kg
+    </Text>
   </View>
 
   {restDetails && (
@@ -193,6 +199,7 @@ useEffect(() => {
           </View>
         ))}
       </View>
+      
 
       {/* Stats */}
       <Text style={{ fontSize: 22, fontWeight: 'bold', marginTop: 15 }}>Stats:</Text>
@@ -258,6 +265,7 @@ useEffect(() => {
               )}
               <Text style={{ textTransform: 'capitalize', marginTop: 5, paddingBottom:50 }}>{evo.name}</Text>
             </TouchableOpacity>
+            
           );
         })}
       </ScrollView>

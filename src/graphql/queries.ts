@@ -33,15 +33,11 @@ export { GET_POKEMONS };
           name
         }
       }
-      stats {
-        base_stat
-        stat {
-          name
-        }
-      }
+    
     }
   }
 `;
+
 export { GET_POKEMON_DETAILS };
 
 
