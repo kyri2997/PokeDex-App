@@ -14,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useFavourites } from '../../context/FavouritesContext';
 import { getTypeColor } from '../../utils/pokemonTypes';
 
+
 // GraphQL query for basic Pokémon info
 const GET_POKEMON_BASIC = gql`
   query getPokemon($name: String!) {
@@ -60,6 +61,8 @@ export default function PokemonDetails() {
   const [speciesInfo, setSpeciesInfo] = useState<SpeciesInfo | null>(null);
   const [evolutions, setEvolutions] = useState<Evolution[]>([]);
 
+
+
   // Conditional back: comes from query param or default
     const { from } = useLocalSearchParams<{ from?: string }>();
 
@@ -74,6 +77,7 @@ export default function PokemonDetails() {
         break;
     }
     };
+
 
 
   // Fetch REST API details
