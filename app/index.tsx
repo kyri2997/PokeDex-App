@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, FlatList, Image, TouchableOpacity, TextInput } from 'react-native';
+import { ActivityIndicator, StyleSheet, View, Text, FlatList, Image, TouchableOpacity, TextInput } from 'react-native';
 import { useQuery } from '@apollo/client/react';
 import { useRouter } from 'expo-router';
 import { GET_POKEMONS, GET_TYPES } from '../src/graphql/queries';
@@ -6,6 +6,8 @@ import { useState, useEffect } from 'react';
 import { getTypeColor } from '../utils/pokemonTypes';
 import { Picker } from '@react-native-picker/picker';
 import { Pokemon, Type } from '../src/types/pokemon';
+import { useFavourites } from '../context/FavouritesContext';
+import { Ionicons } from '@expo/vector-icons';
 
 
 export default function Home() {
@@ -15,6 +17,8 @@ export default function Home() {
   const [search, setSearch] = useState('');
   const [selectedType, setSelectedType] = useState<string>('all');
   const [filteredPokemons, setFilteredPokemons] = useState<Pokemon[]>([]);
+  const { addFavourite, removeFavourite, isFavourite } = useFavourites();
+
 
   // 🔹 Fetch Pokémon list
 const { data } = useQuery<{ pokemon: Pokemon[] }>(GET_POKEMONS);
@@ -46,18 +50,38 @@ const { data: typeData } = useQuery<{ type: Type[] }>(GET_TYPES);
   }, [search, selectedType, data]);
 
   // 🔹 Loading & error states
-  if (loading) return <Text>Loading Pokémons...</Text>;
-  if (error) return <Text>Error: {error.message}</Text>;
+if (loading)
+  return (
+    <View style={styles.statusContainer}>
+      <ActivityIndicator size="large" color="#fff" />
+      <Text style={styles.statusText}>Loading Pokédex...</Text>
+    </View>
+  );
+
+if (error)
+  return (
+    <View style={styles.statusContainer}>
+      <Text style={styles.statusText}>⚠️ Error: {error.message}</Text>
+    </View>
+  );
 
   return (
+      <View style={{ flex: 1, backgroundColor: '#ff4500' }}>
+
     <FlatList
       data={filteredPokemons}
       keyExtractor={(item) => item.id.toString()}
-      contentContainerStyle={{ padding: 20, paddingBottom: 40, backgroundColor: '#f0f0f0' }}
+      contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
       // 🔹 Header with search, filters, and title
       ListHeaderComponent={
         <>
+             <Image
+              source={require('../assets/pokedex.png')}
+              style={{ width: 100 , height: 100, justifyContent: 'center', alignSelf: 'center', marginTop: 50 }}
+              resizeMode="contain"
+            />
           <Text style={styles.title}>Pokédex</Text>
+          
 
           {/* Search Bar */}
           <TextInput
@@ -98,43 +122,53 @@ const { data: typeData } = useQuery<{ type: Type[] }>(GET_TYPES);
         </>
       }
       // 🔹 Render each Pokémon in a retro card style
-      renderItem={({ item }) => {
-        const spriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${item.id}.png`;
-        return (
-          <TouchableOpacity onPress={() => router.push(`/pokemon/${item.name}`)}>
-            <View style={styles.pokemonCard}>
-              <Image source={{ uri: spriteUrl }} style={styles.sprite} />
+    renderItem={({ item }) => {
+  const spriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${item.id}.png`;
 
-              <View style={{ flex: 1 }}>
-                <Text style={styles.pokemonName}>{item.name}</Text>
+  return (
+    <TouchableOpacity onPress={() => router.push(`/pokemon/${item.name}`)}>
+      <View style={styles.pokemonCard}>
+        {/* Sprite */}
+        <Image source={{ uri: spriteUrl }} style={styles.sprite} />
 
-                {/* Pokémon types badges */}
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-                  {item.pokemontypes?.map((t: any) => (
-                    <Text
-                      key={t.type.name}
-                      style={{
-                        fontSize: 14,
-                        textTransform: 'capitalize',
-                        backgroundColor: getTypeColor(t.type.name),
-                        color: 'white',
-                        paddingHorizontal: 6,
-                        paddingVertical: 2,
-                        borderRadius: 6,
-                        marginRight: 4,
-                        marginBottom: 2,
-                      }}
-                    >
-                      {t.type.name}
-                    </Text>
-                  ))}
-                </View>
-              </View>
-            </View>
-          </TouchableOpacity>
-        );
-      }}
+        {/* Name + Types */}
+        <View style={styles.pokemonInfo}>
+          <Text style={styles.pokemonName}>{item.name}</Text>
+
+          <View style={styles.typeContainer}>
+            {item.pokemontypes?.map((t: any) => (
+              <Text
+                key={t.type.name}
+                style={[styles.typeBadge, { backgroundColor: getTypeColor(t.type.name) }]}
+              >
+                {capitalize(t.type.name)}
+              </Text>
+            ))}
+          </View>
+        </View>
+
+        {/* Favourite Star */}
+        <TouchableOpacity
+          onPress={() =>
+            isFavourite(item.name)
+              ? removeFavourite(item.name)
+              : addFavourite({ id: item.id, name: item.name })
+          }
+          style={styles.favouriteButton}
+        >
+          <Ionicons
+            name={isFavourite(item.name) ? 'star' : 'star-outline'}
+            size={28}
+            color="#ffd700"
+          />
+        </TouchableOpacity>
+      </View>
+    </TouchableOpacity>
+  );
+}}
+
     />
+      </View>
   );
 }
 
@@ -145,12 +179,26 @@ function capitalize(s: string) {
 
 // 🔹 Styles
 const styles = StyleSheet.create({
-  title: {
-    fontSize: 32,
+    statusContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#ff4500', // matches app background
+    padding: 20,
+  },
+  statusText: {
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 20,
-    paddingTop: 80,
-    color: '#ff4500',
+    color: '#fff',
+    marginTop: 12,
+    textAlign: 'center',
+  },
+  title: {
+    fontSize: 42,
+    fontWeight: 'bold',
+    marginBottom: 30,
+    // paddingTop: 60,
+    color: 'white',
     textAlign: 'center',
   },
   searchBar: {
@@ -168,7 +216,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     marginBottom: 10,
     backgroundColor: '#fff',
-    width: '50%',
+    width: '100%',
     
     // alignSelf: 'center',
   },
@@ -203,7 +251,33 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textTransform: 'capitalize',
     marginBottom: 6,
-    color: '#ff4500',
+    color: 'black',
   },
+  pokemonInfo: {
+  flex: 1,
+  flexDirection: 'column',
+},
+
+typeContainer: {
+  flexDirection: 'row',
+  flexWrap: 'wrap',
+},
+
+typeBadge: {
+  fontSize: 14,
+  color: 'white',
+  paddingHorizontal: 6,
+  paddingVertical: 2,
+  borderRadius: 6,
+  marginRight: 4,
+  marginBottom: 2,
+},
+
+favouriteButton: {
+  paddingLeft: 10,
+  justifyContent: 'center',
+  alignItems: 'center',
+},
+
 
 });

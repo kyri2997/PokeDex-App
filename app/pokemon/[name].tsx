@@ -61,11 +61,20 @@ export default function PokemonDetails() {
   const [evolutions, setEvolutions] = useState<Evolution[]>([]);
 
   // Conditional back: comes from query param or default
-  const { from } = useLocalSearchParams<{ from?: string }>();
-  const handleBack = () => {
-    if (from === 'favourites') router.push('/favourites');
-    else router.back();
-  };
+    const { from } = useLocalSearchParams<{ from?: string }>();
+
+    const handleBack = () => {
+    switch (from) {
+        case 'favourites':
+        router.replace('/favourites'); // use replace to avoid stacking
+        break;
+        case 'pokedex':
+        default:
+        router.replace('/'); 
+        break;
+    }
+    };
+
 
   // Fetch REST API details
   useEffect(() => {
