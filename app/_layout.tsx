@@ -35,6 +35,12 @@ export default function Layout() {
               ),
             }}
           />
+          <Tabs.Screen
+        name="pokemon"
+        options={{
+          href: null,
+        }}
+      />
         </Tabs>
       </FavouritesProvider>
     </ApolloProvider>

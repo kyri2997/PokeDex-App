@@ -126,7 +126,7 @@ if (error)
   const spriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${item.id}.png`;
 
   return (
-    <TouchableOpacity onPress={() => router.replace(`/pokemon/${item.name}`)}>
+    <TouchableOpacity onPress={() => router.replace(`/pokemon/${item.name}`)} activeOpacity={0.7}>
       <View style={styles.pokemonCard}>
         {/* Sprite */}
         <Image source={{ uri: spriteUrl }} style={styles.sprite} />
