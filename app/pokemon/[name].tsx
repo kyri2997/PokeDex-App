@@ -37,10 +37,15 @@ export default function PokemonDetails() {
 
   const [restDetails, setRestDetails] = useState<any>(null);
   const [evolutions, setEvolutions] = useState<string[]>([]);
+  const [speciesInfo, setSpeciesInfo] = useState<{ flavor: string; generation?: string } | null>(
+    null
+  );
+
 useEffect(() => {
   if (!pokemonName) return; // nothing to fetch
 
   let isCancelled = false; // prevent setting state after unmount
+  
 
   const fetchDetails = async () => {
     try {
@@ -56,6 +61,17 @@ useEffect(() => {
       const resSpecies = await fetch(pokemonJson.species.url);
       if (!resSpecies.ok) throw new Error('Failed to fetch species data');
       const speciesJson = await resSpecies.json();
+
+      // Flavour text
+      const flavorEntry = speciesJson.flavor_text_entries.find(
+            (entry: any) => entry.language.name === "en"
+            );
+            const flavor = flavorEntry
+            ? flavorEntry.flavor_text.replace(/\n|\f/g, " ")
+            : "No flavor text available.";
+
+            const generation = speciesJson.generation?.name;
+            setSpeciesInfo({ flavor, generation });
 
       // 3️⃣ Fetch evolution chain
       const resEvolution = await fetch(speciesJson.evolution_chain.url);
@@ -200,6 +216,20 @@ useEffect(() => {
         ))}
       </View>
       
+      {/* Generation */}
+        {speciesInfo?.generation && (
+        <Text style={{  marginTop: 15, fontSize: 22}}>
+            <Text style={{  fontWeight: 'bold'  }}>Generation: </Text>
+            {speciesInfo.generation.replace("generation-", "Gen ").toUpperCase()}
+        </Text>
+        )}
+    {/* Pokédex flavor text */}
+        {speciesInfo?.flavor && (
+        <View style={{ marginTop: 16, padding: 12, backgroundColor: "#fff7f0", borderRadius: 8 }}>
+            <Text style={{ fontWeight: "700", marginBottom: 6 }}>Pokédex Entry</Text>
+            <Text style={{ fontStyle: "italic" }}>{speciesInfo.flavor}</Text>
+        </View>
+        )}
 
       {/* Stats */}
       <Text style={{ fontSize: 22, fontWeight: 'bold', marginTop: 15 }}>Stats:</Text>
@@ -269,6 +299,7 @@ useEffect(() => {
           );
         })}
       </ScrollView>
+      
     </>
   )}
 </ScrollView>
