@@ -25,7 +25,7 @@ export default function Layout() {
               ),
             }}
           />
-             <Tabs.Screen
+             {/* <Tabs.Screen
               name="pokemon/[name]"
               options={{
                 title: "Details",
@@ -33,7 +33,7 @@ export default function Layout() {
                   <Ionicons name="information-circle" size={size} color={color} />
                 ),
               }}
-            />
+            /> */}
           <Tabs.Screen
             name="favourites"
             options={{
