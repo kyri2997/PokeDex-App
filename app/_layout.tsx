@@ -14,6 +14,7 @@ export default function Layout() {
             tabBarActiveTintColor: '#ff4500',
             tabBarInactiveTintColor: '#555',
             tabBarStyle: { height: 75, paddingBottom: 5 },
+            
           }}
         >
           <Tabs.Screen
@@ -25,15 +26,6 @@ export default function Layout() {
               ),
             }}
           />
-             {/* <Tabs.Screen
-              name="pokemon/[name]"
-              options={{
-                title: "Details",
-                tabBarIcon: ({ color, size }) => (
-                  <Ionicons name="information-circle" size={size} color={color} />
-                ),
-              }}
-            /> */}
           <Tabs.Screen
             name="favourites"
             options={{
