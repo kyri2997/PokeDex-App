@@ -3,7 +3,7 @@ import { gql } from '@apollo/client';
 
 const GET_POKEMONS = gql`
   query {
-    pokemon(limit: 200, offset: 0) {
+    pokemon(limit: 500, offset: 0) {
        id
       name
       pokemontypes {
@@ -11,6 +11,7 @@ const GET_POKEMONS = gql`
           name
         }
       }
+      
     }
   }
 `;

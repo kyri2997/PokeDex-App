@@ -1,10 +1,12 @@
-import { View, Text, FlatList, Image, TouchableOpacity, TextInput } from 'react-native';
+import { StyleSheet, View, Text, FlatList, Image, TouchableOpacity, TextInput } from 'react-native';
 import { useQuery } from '@apollo/client/react';
 import { useRouter } from 'expo-router';
 import { GET_POKEMONS, GET_TYPES } from '../src/graphql/queries';
 import { useState, useEffect } from 'react';
 import { getTypeColor } from '../utils/pokemonTypes';
 import { Picker } from '@react-native-picker/picker';
+import { Pokemon, Type } from '../src/types/pokemon';
+
 
 export default function Home() {
   const router = useRouter();
@@ -12,13 +14,13 @@ export default function Home() {
   // 🔹 State for search & filters
   const [search, setSearch] = useState('');
   const [selectedType, setSelectedType] = useState<string>('all');
-  const [filteredPokemons, setFilteredPokemons] = useState<any[]>([]);
+  const [filteredPokemons, setFilteredPokemons] = useState<Pokemon[]>([]);
 
   // 🔹 Fetch Pokémon list
-  const { data, loading, error } = useQuery(GET_POKEMONS);
-
+const { data } = useQuery<{ pokemon: Pokemon[] }>(GET_POKEMONS);
+const { loading, error } = useQuery(GET_POKEMONS);
   // 🔹 Fetch Pokémon types for filter dropdown
-  const { data: typeData } = useQuery(GET_TYPES);
+const { data: typeData } = useQuery<{ type: Type[] }>(GET_TYPES);
 
   // 🔹 Filter Pokémon whenever search or selected type changes
   useEffect(() => {
@@ -70,7 +72,7 @@ export default function Home() {
             <Picker
               selectedValue={selectedType}
               onValueChange={(itemValue) => setSelectedType(itemValue)}
-              
+          
             >
               <Picker.Item label="All types" value="all" />
               {typeData?.type.map((t: any) => (
@@ -79,7 +81,6 @@ export default function Home() {
                   label={capitalize(t.name)}
                   value={t.name}
                   color={getTypeColor(t.name)}
-                 style={{ height: 50, width: '50%' }}
                 />
               ))}
             </Picker>
@@ -143,7 +144,7 @@ function capitalize(s: string) {
 }
 
 // 🔹 Styles
-const styles = {
+const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
@@ -204,4 +205,5 @@ const styles = {
     marginBottom: 6,
     color: '#ff4500',
   },
-};
+
+});

@@ -13,7 +13,7 @@ export default function Layout() {
             headerShown: false,
             tabBarActiveTintColor: '#ff4500',
             tabBarInactiveTintColor: '#555',
-            tabBarStyle: { height: 65, paddingBottom: 5 },
+            tabBarStyle: { height: 75, paddingBottom: 5 },
           }}
         >
           <Tabs.Screen

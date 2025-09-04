@@ -94,7 +94,7 @@ export default function FavouritesPage() {
 
             {/* Remove Button */}
             <TouchableOpacity
-              onPress={() => removeFavourite(item.id)}
+              onPress={() => removeFavourite(item.name)}
               style={{
                 padding: 6,
                 borderRadius: 12,
