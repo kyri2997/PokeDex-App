@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     // marginBottom: 10,
     // contain
     resizeMode: 'contain',
-  },
+  }, 
   title: {
     // fontSize: 32,
     // fontWeight: 'bold',
