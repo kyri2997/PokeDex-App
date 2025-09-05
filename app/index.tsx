@@ -1,283 +1,82 @@
-import { ActivityIndicator, StyleSheet, View, Text, FlatList, Image, TouchableOpacity, TextInput } from 'react-native';
+// app/index.tsx
+import React, { useMemo, useState, useCallback } from 'react';
+import { View, Text, FlatList, TextInput, StyleSheet, ActivityIndicator } from 'react-native';
 import { useQuery } from '@apollo/client/react';
-import { useRouter } from 'expo-router';
 import { GET_POKEMONS, GET_TYPES } from '../src/graphql/queries';
-import { useState, useEffect } from 'react';
-import { getTypeColor } from '../utils/pokemonTypes';
+import { Pokemon } from '../src/types/pokemon';
+import { PokemonCard } from '../src/components/PokemonCard';
 import { Picker } from '@react-native-picker/picker';
-import { Pokemon, Type } from '../src/types/pokemon';
-import { useFavourites } from '../context/FavouritesContext';
-import { Ionicons } from '@expo/vector-icons';
-
 
 export default function Home() {
-  const router = useRouter();
-
-  // 🔹 State for search & filters
   const [search, setSearch] = useState('');
   const [selectedType, setSelectedType] = useState<string>('all');
-  const [filteredPokemons, setFilteredPokemons] = useState<Pokemon[]>([]);
-  const { addFavourite, removeFavourite, isFavourite } = useFavourites();
 
+  const { data, loading, error } = useQuery<{ pokemon: Pokemon[] }>(GET_POKEMONS);
+  const { data: typesData } = useQuery<{ type: { name: string }[] }>(GET_TYPES);
 
-  // 🔹 Fetch Pokémon list
-const { data } = useQuery<{ pokemon: Pokemon[] }>(GET_POKEMONS);
-const { loading, error } = useQuery(GET_POKEMONS);
-  // 🔹 Fetch Pokémon types for filter dropdown
-const { data: typeData } = useQuery<{ type: Type[] }>(GET_TYPES);
+  // Declarative filtering with useMemo 
+  const filtered = useMemo(() => {
+    const all = data?.pokemon ?? [];
+    const bySearch = search ? all.filter(p => p.name.toLowerCase().includes(search.toLowerCase())) : all;
 
-  // 🔹 Filter Pokémon whenever search or selected type changes
-  useEffect(() => {
-    if (!data?.pokemon) return;
-
-    let results = data.pokemon;
-
-    // Filter by search query
-    if (search) {
-      results = results.filter((p: any) =>
-        p.name.toLowerCase().includes(search.toLowerCase())
-      );
+    if (selectedType && selectedType !== 'all') {
+      return bySearch.filter(p => p.pokemontypes?.some(t => t.type.name === selectedType));
     }
+    return bySearch;
+  }, [data, search, selectedType]);
 
-    // Filter by type
-    if (selectedType !== 'all') {
-      results = results.filter((p: any) =>
-        p.pokemontypes?.some((t: any) => t.type.name === selectedType)
-      );
-    }
+  const renderItem = useCallback(({ item }: { item: Pokemon }) => <PokemonCard item={item} />, []);
 
-    setFilteredPokemons(results);
-  }, [search, selectedType, data]);
-
-  // 🔹 Loading & error states
-if (loading)
-  return (
-    <View style={styles.statusContainer}>
-      <ActivityIndicator size="large" color="#fff" />
-      <Text style={styles.statusText}>Loading Pokédex...</Text>
-    </View>
-  );
-
-if (error)
-  return (
-    <View style={styles.statusContainer}>
-      <Text style={styles.statusText}>⚠️ Error: {error.message}</Text>
-    </View>
-  );
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color="#fff" />
+        <Text style={styles.loadingText}>Loading Pokédex...</Text>
+      </View>
+    );
+  }
+  if (error) return <View style={styles.center}><Text style={styles.loadingText}>Error: {error.message}</Text></View>;
 
   return (
-      <View style={{ flex: 1, backgroundColor: '#ff4500' }}>
+    <View style={styles.container}>
+      <Text style={styles.title}>Pokédex</Text>
 
-    <FlatList
-      data={filteredPokemons}
-      keyExtractor={(item) => item.id.toString()}
-      contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
-      // 🔹 Header with search, filters, and title
-      ListHeaderComponent={
-        <>
-             <Image
-              source={require('../assets/pokedex.png')}
-              style={{ width: 100 , height: 100, justifyContent: 'center', alignSelf: 'center', marginTop: 50 }}
-              resizeMode="contain"
-            />
-          <Text style={styles.title}>Pokédex</Text>
-          
+      <TextInput
+        placeholder="Search Pokémon..."
+        value={search}
+        onChangeText={setSearch}
+        style={styles.search}
+        returnKeyType="search"
+      />
 
-          {/* Search Bar */}
-          <TextInput
-            placeholder="Search Pokémon..."
-            value={search}
-            onChangeText={setSearch}
-            style={styles.searchBar}
-          />
-
-          {/* Type Filter Dropdown */}
-          <View style={styles.dropdownContainer}>
-            <Picker
-              selectedValue={selectedType}
-              onValueChange={(itemValue) => setSelectedType(itemValue)}
-          
-            >
-              <Picker.Item label="All types" value="all" />
-              {typeData?.type.map((t: any) => (
-                <Picker.Item
-                  key={t.name}
-                  label={capitalize(t.name)}
-                  value={t.name}
-                  color={getTypeColor(t.name)}
-                />
-              ))}
-            </Picker>
-          </View>
-
-          {/* Clear filter button */}
-          {selectedType !== 'all' && (
-            <TouchableOpacity
-              onPress={() => setSelectedType('all')}
-              style={styles.clearFilterButton}
-            >
-              <Text style={{ color: '#333', fontWeight: '500' }}>Clear Filter ✕</Text>
-            </TouchableOpacity>
-          )}
-        </>
-      }
-      // 🔹 Render each Pokémon in a retro card style
-    renderItem={({ item }) => {
-  const spriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${item.id}.png`;
-
-  return (
-    <TouchableOpacity onPress={() => router.replace(`/pokemon/${item.name}`)} activeOpacity={0.7}>
-      <View style={styles.pokemonCard}>
-        {/* Sprite */}
-        <Image source={{ uri: spriteUrl }} style={styles.sprite} />
-
-        {/* Name + Types */}
-        <View style={styles.pokemonInfo}>
-          <Text style={styles.pokemonName}>{item.name}</Text>
-
-          <View style={styles.typeContainer}>
-            {item.pokemontypes?.map((t: any) => (
-              <Text
-                key={t.type.name}
-                style={[styles.typeBadge, { backgroundColor: getTypeColor(t.type.name) }]}
-              >
-                {capitalize(t.type.name)}
-              </Text>
-            ))}
-          </View>
+      <View style={styles.filtersRow}>
+        <View style={styles.dropdown}>
+          <Picker selectedValue={selectedType} onValueChange={(v) => setSelectedType(v)}>
+            <Picker.Item label="All types" value="all" />
+            {typesData?.type.map(t => <Picker.Item key={t.name} label={t.name} value={t.name} />)}
+          </Picker>
         </View>
-
-        {/* Favourite Star */}
-        <TouchableOpacity
-          onPress={() =>
-            isFavourite(item.name)
-              ? removeFavourite(item.name)
-              : addFavourite({ id: item.id, name: item.name })
-          }
-          style={styles.favouriteButton}
-        >
-          <Ionicons
-            name={isFavourite(item.name) ? 'star' : 'star-outline'}
-            size={28}
-            color="#ffd700"
-          />
-        </TouchableOpacity>
       </View>
-    </TouchableOpacity>
-  );
-}}
 
-    />
-      </View>
+      <FlatList
+        data={filtered}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={{ padding: 20 }}
+        initialNumToRender={12}
+        windowSize={10}
+        removeClippedSubviews
+      />
+    </View>
   );
 }
 
-// 🔹 Helper function to capitalize
-function capitalize(s: string) {
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
-
-// 🔹 Styles
 const styles = StyleSheet.create({
-    statusContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#ff4500', // matches app background
-    padding: 20,
-  },
-  statusText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginTop: 12,
-    textAlign: 'center',
-  },
-  title: {
-    fontSize: 42,
-    fontWeight: 'bold',
-    marginBottom: 30,
-    // paddingTop: 60,
-    color: 'white',
-    textAlign: 'center',
-  },
-  searchBar: {
-    padding: 15,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    marginBottom: 10,
-    backgroundColor: '#fff',
-  },
-  dropdownContainer: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    overflow: 'hidden',
-    marginBottom: 10,
-    backgroundColor: '#fff',
-    width: '100%',
-    
-    // alignSelf: 'center',
-  },
-  clearFilterButton: {
-    alignSelf: 'flex-start',
-    marginBottom: 10,
-    backgroundColor: '#eee',
-    borderRadius: 20,
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-  },
-  pokemonCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
-    padding: 12,
-    marginBottom: 12,
-    borderRadius: 16,
-    backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 3,
-  },
-  sprite: {
-    width: 50,
-    height: 50,
-    marginRight: 12,
-  },
-  pokemonName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    textTransform: 'capitalize',
-    marginBottom: 6,
-    color: 'black',
-  },
-  pokemonInfo: {
-  flex: 1,
-  flexDirection: 'column',
-},
-
-typeContainer: {
-  flexDirection: 'row',
-  flexWrap: 'wrap',
-},
-
-typeBadge: {
-  fontSize: 14,
-  color: 'white',
-  paddingHorizontal: 6,
-  paddingVertical: 2,
-  borderRadius: 6,
-  marginRight: 4,
-  marginBottom: 2,
-},
-
-favouriteButton: {
-  paddingLeft: 10,
-  justifyContent: 'center',
-  alignItems: 'center',
-},
-
-
+  container: { flex: 1, backgroundColor: '#ff4500' },
+  title: { fontSize: 32, fontWeight: 'bold', color: '#fff', marginTop: 60, marginLeft: 20, marginBottom: 10 },
+  search: { margin: 20, padding: 12, borderRadius: 8, backgroundColor: '#fff' },
+  filtersRow: { flexDirection: 'row', paddingHorizontal: 20 },
+  dropdown: { flex: 1, borderRadius: 8, overflow: 'hidden', backgroundColor: '#fff' },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#ff4500' },
+  loadingText: { color: '#fff', marginTop: 12, fontWeight: '700' },
 });
