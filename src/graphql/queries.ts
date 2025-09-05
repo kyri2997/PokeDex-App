@@ -64,3 +64,4 @@ const GET_TYPES = gql`
   }
 `;
 export { GET_TYPES };
+

@@ -13,26 +13,11 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useFavourites } from '../../context/FavouritesContext';
 import { getTypeColor } from '../../utils/pokemonTypes';
-
-
-// GraphQL query for basic Pokémon info
-const GET_POKEMON_BASIC = gql`
-  query getPokemon($name: String!) {
-    pokemon(where: { name: { _eq: $name } }) {
-      id
-      name
-      height
-      weight
-    }
-  }
-`;
-
-type PokemonBasic = {
-  id: number;
-  name: string;
-  height: number;
-  weight: number;
-};
+import { GET_POKEMON_BASIC } from '../../src/graphql/queries';
+import { Pokemon } from '../../src/types/pokemon';
+import  PokemonHeader from '@/components/PokemonHeader';
+import  PokemonBadges from '@/components/PokemonBadges';
+import PokemonStats from '@/components/PokemonStats';
 
 type PokemonRestDetails = {
   types: { slot: number; type: { name: string } }[];
@@ -52,7 +37,7 @@ export default function PokemonDetails() {
   const { addFavourite, removeFavourite, isFavourite } = useFavourites();
 
   // GraphQL basic Pokémon info
-  const { data, loading, error } = useQuery<{ pokemon: PokemonBasic[] }>(
+  const { data, loading, error } = useQuery<{ pokemon: Pokemon[] }>(
     GET_POKEMON_BASIC,
     { variables: { name: pokemonName.toLowerCase() } }
   );
@@ -163,31 +148,12 @@ export default function PokemonDetails() {
       style={styles.container}
       contentContainerStyle={{ paddingBottom: 60 }}
     >
-      {/* Header Row: Back | Name | Favourite */}
-      <View style={styles.headerRow}>
-        <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
-          <Ionicons name="arrow-back" size={24} color="#ff4500" />
-        </TouchableOpacity>
-
-        <Text style={styles.title} numberOfLines={1}>
-          {pokemon.name}
-        </Text>
-
-        <TouchableOpacity
-          onPress={() =>
-            isFavourite(pokemon.name)
-              ? removeFavourite(pokemon.name)
-              : addFavourite({ id: pokemon.id, name: pokemon.name })
-          }
-          style={styles.favBtn}
-        >
-          <Ionicons
-            name={isFavourite(pokemon.name) ? 'star' : 'star-outline'}
-            size={32}
-            color="#ffd700"
-          />
-        </TouchableOpacity>
-      </View>
+        {/* Header with back and fav */}
+        <PokemonHeader
+            id={pokemon.id}
+            name={pokemon.name}
+            onBack={handleBack}
+            />
 
       {/* Sprite */}
       <Image source={{ uri: spriteUrl }} style={styles.sprite} />
@@ -211,36 +177,15 @@ export default function PokemonDetails() {
       {restDetails && (
         <>
           {/* Types */}
-          <Text style={styles.sectionTitle}>Types:</Text>
-          <View style={styles.rowWrap}>
-            {restDetails.types.map((t) => (
-              <View
-                key={t.slot}
-                style={[styles.typeBadge, { backgroundColor: getTypeColor(t.type.name) }]}
-              >
-                <Text style={styles.typeText}>{t.type.name}</Text>
-              </View>
-            ))}
-          </View>
+            <Text style={styles.sectionTitle}>Types:</Text>
+            <PokemonBadges items={restDetails.types.map(t => ({ name: t.type.name }))} variant="type" />
 
-          {/* Abilities */}
-          <Text style={styles.sectionTitle}>Abilities:</Text>
-          <View style={styles.rowWrap}>
-            {restDetails.abilities.map((a) => (
-              <View
-                key={a.ability.name}
-                style={[
-                  styles.abilityBadge,
-                  { backgroundColor: a.is_hidden ? '#6a5acd' : '#20b2aa' },
-                ]}
-              >
-                <Text style={styles.typeText}>
-                  {a.ability.name}
-                  {a.is_hidden ? ' (Hidden)' : ''}
-                </Text>
-              </View>
-            ))}
-          </View>
+            {/* Abilities */}
+            <Text style={styles.sectionTitle}>Abilities:</Text>
+            <PokemonBadges
+            items={restDetails.abilities.map(a => ({ name: a.ability.name, isHidden: a.is_hidden }))}
+            variant="ability"
+            />
 
           {/* Generation */}
           {speciesInfo?.generation && (
@@ -259,24 +204,9 @@ export default function PokemonDetails() {
           )}
 
           {/* Stats */}
-          <Text style={styles.sectionTitle}>Stats:</Text>
-          <View style={{ marginVertical: 5 }}>
-            {restDetails.stats.map((s) => (
-              <View key={s.stat.name} style={{ marginBottom: 8 }}>
-                <Text style={styles.statText}>
-                  {s.stat.name}: {s.base_stat}
-                </Text>
-                <View style={styles.statBar}>
-                  <View
-                    style={[
-                      styles.statFill,
-                      { width: `${(s.base_stat / 255) * 100}%` },
-                    ]}
-                  />
-                </View>
-              </View>
-            ))}
-          </View>
+        <Text style={styles.sectionTitle}>Stats:</Text>
+         <PokemonStats stats={restDetails.stats} />
+ 
 
           {/* Evolution Chain */}
           <Text style={styles.sectionTitle}>Evolution Chain:</Text>

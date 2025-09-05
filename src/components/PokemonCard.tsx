@@ -1,4 +1,5 @@
-// components/PokemonCard.tsx
+// pokemon card for Pokedex list
+
 import React, { memo, useCallback } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { Pokemon } from '../types/pokemon';
