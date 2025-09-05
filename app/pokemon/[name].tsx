@@ -46,6 +46,9 @@ export default function PokemonDetails() {
   const [speciesInfo, setSpeciesInfo] = useState<SpeciesInfo | null>(null);
   const [evolutions, setEvolutions] = useState<Evolution[]>([]);
 
+  // bg colouring for type
+    const primaryType = restDetails?.types[0]?.type.name;
+    const bgColor = primaryType ? getTypeColor(primaryType) : '#f0f8ff';
 
 
   // Conditional back: comes from query param or default
@@ -144,8 +147,11 @@ export default function PokemonDetails() {
   const spriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png`;
 
   return (
+
+<View style={styles.container}>
+
     <ScrollView
-      style={styles.container}
+
       contentContainerStyle={{ paddingBottom: 60 }}
     >
         {/* Header with back and fav */}
@@ -156,7 +162,7 @@ export default function PokemonDetails() {
             />
 
       {/* Sprite */}
-      <Image source={{ uri: spriteUrl }} style={styles.sprite} />
+      <Image source={{ uri: spriteUrl }} style={[styles.sprite, { borderColor: bgColor }]} />
 
       {/* Basic Info: ID, Height, Weight */}
       <View style={styles.basicInfo}>
@@ -242,17 +248,18 @@ export default function PokemonDetails() {
         </>
       )}
     </ScrollView>
+</View>
   );
 }
 
 // Shared styles
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 80, paddingHorizontal: 20, paddingBottom: 40, backgroundColor: '#f0f8ff' },
+  container: { flex: 1, paddingTop: 80, paddingHorizontal: 20, paddingBottom: 40 },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, paddingHorizontal: 10 },
   backBtn: { padding: 8, borderRadius: 8, backgroundColor: '#ffebcd' },
   favBtn: { padding: 8 },
   title: { fontSize: 32, fontWeight: 'bold', textTransform: 'capitalize', color: '#ff4500', textAlign: 'center', flex: 1 },
-  sprite: { width: 180, height: 180, alignSelf: 'center', marginVertical: 20, borderRadius: 90, borderWidth: 3, borderColor: '#ffa500' },
+  sprite: { width: 180, height: 180, alignSelf: 'center', marginVertical: 20, borderRadius: 90, borderWidth: 5,  backgroundColor: '#f0f8ff' },
   basicInfo: { flexDirection: 'row', justifyContent: 'space-around', marginBottom: 15 },
   bold: { fontWeight: 'bold' },
   sectionTitle: { fontSize: 22, fontWeight: 'bold', marginTop: 15 },

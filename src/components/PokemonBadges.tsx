@@ -27,7 +27,6 @@ export default function PokemonBadges({ items, variant }: Props) {
           <View key={index} style={[styles.badge, { backgroundColor: bgColor }]}>
             <Text style={styles.text}>
               {item.name}
-              {variant === 'ability' && item.isHidden ? ' (Hidden)' : ''}
             </Text>
           </View>
         );
